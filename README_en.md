@@ -119,7 +119,3 @@ curl -X POST http://localhost:8000/render \
 ## 📄 License
 
 MIT License – See [LICENSE](LICENSE) for details.
-
----
-
-Let me know if you need this as a `.md` file or if you'd like any formatting tweaks!
