@@ -1,0 +1,36 @@
+# 臨時檔案
+tmp/*
+!tmp/.gitkeep
+
+# 日誌檔案
+logs/*
+!logs/.gitkeep
+
+# 備忘錄歷史檔案
+history/*
+!history/.gitkeep
+
+# Node.js
+node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 環境變數檔案
+.env
+.env.local
+.env.production
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+# 編輯器
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# PHP
+vendor/
+composer.lock

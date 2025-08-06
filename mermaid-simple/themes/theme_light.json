@@ -1,0 +1,60 @@
+{
+  "theme": "base",
+  "themeVariables": {
+    "background": "transparent",
+    "fontFamily": "Arial, PingFang TC, Microsoft JhengHei, sans-serif",
+    "fontSize": "16px",
+    
+    "primaryColor": "#f8f9fa",
+    "primaryTextColor": "#212529",
+    "primaryBorderColor": "#adb5bd",
+    
+    "secondaryColor": "#e9ecef",
+    "secondaryTextColor": "#212529",
+    "secondaryBorderColor": "#ced4da",
+
+    "tertiaryColor": "#dee2e6",
+    "tertiaryTextColor": "#212529",
+    "tertiaryBorderColor": "#ced4da",
+
+    "lineColor": "#495057",
+    "textColor": "#212529",
+
+    "mainBkg": "#ffffff",
+    "nodeBkg": "#f8f9fa",
+    "nodeTextColor": "#212529",
+    "nodeBorderRadius": "5px",
+    
+    "clusterBkg": "#f1f3f5",
+    "clusterBorder": "#dee2e6",
+    
+    "rectBkg": "#f8f9fa",
+    "rectTextColor": "#212529",
+    "rectBorderRadius": "5px",
+    
+    "actorBkg": "#f8f9fa",
+    "actorBorder": "#495057",
+    "actorTextColor": "#212529",
+    "actorLineColor": "#495057",
+
+    "noteBkgColor": "#e9ecef",
+    "noteTextColor": "#212529",
+    "noteBorderColor": "#adb5bd",
+
+    "activationBkgColor": "#dee2e6",
+    "activationBorderColor": "#6c757d",
+    
+    "pieTitleTextColor": "#212529",
+    "pieSectionTextColor": "#212529",
+
+    "pie1": "#212529",
+    "pie2": "#495057",
+    "pie3": "#6c757d",
+    "pie4": "#adb5bd",
+    "pie5": "#ced4da",
+    "pie6": "#dee2e6",
+    "pie7": "#e9ecef",
+    "pie8": "#f1f3f5",
+    "pie9": "#f8f9fa"
+  }
+}

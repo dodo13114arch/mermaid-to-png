@@ -1,0 +1,29 @@
+{
+  "name": "mermaid-simple",
+  "version": "1.0.0",
+  "description": "🎨 Mermaid Simple - 個人使用的簡化版本 Mermaid 圖表渲染服務",
+  "main": "simple-server.js",
+  "scripts": {
+    "start": "node simple-server.js",
+    "dev": "node simple-server.js"
+  },
+  "keywords": [
+    "mermaid",
+    "diagram", 
+    "svg",
+    "png",
+    "simple",
+    "localhost"
+  ],
+  "author": "David Chang",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "mime-types": "^2.1.35"
+  },
+  "peerDependencies": {
+    "@mermaid-js/mermaid-cli": ">=10.0.0"
+  }
+}

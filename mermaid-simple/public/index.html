@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="David Chang">
+    <meta name="description" content="Mermaid Simple - 個人版圖表渲染工具">
+    <title>Mermaid Simple - 個人版</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --text-color: #333;
+            --panel-bg: white;
+            --panel-shadow: rgba(0,0,0,0.1);
+            --border-color: #ddd;
+            --primary-color:rgb(212, 106, 57);
+            --primary-text: white;
+            --success-color:rgb(250, 177, 20);
+        }
+
+        .dark-mode {
+            --bg-color: #212529;
+            --text-color: #e9ecef;
+            --panel-bg: #343a40;
+            --panel-shadow: rgba(255,255,255,0.1);
+            --border-color: #495057;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px var(--panel-shadow);
+        }
+        
+        .header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.2em;
+        }
+        
+        .header .subtitle {
+            color: var(--text-color);
+            opacity: 0.8;
+            font-size: 1.1em;
+        }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--primary-color);
+            color: var(--primary-text);
+            border: none;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px var(--panel-shadow);
+        }
+        
+        .panel h2 {
+            margin-bottom: 15px;
+            color: var(--text-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 5px;
+        }
+        
+        #code-input {
+            width: 100%;
+            height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            border-radius: 4px;
+            padding: 10px;
+            resize: vertical;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            background: var(--primary-color);
+            color: var(--primary-text);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+        
+        select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background: var(--panel-bg);
+            color: var(--text-color);
+            font-size: 14px;
+        }
+        
+        .examples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .example-btn {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        
+        .example-btn:hover {
+            background: var(--primary-color);
+            color: var(--primary-text);
+        }
+        
+        .preview-area {
+            min-height: 300px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: var(--bg-color);
+        }
+        
+        .preview-svg {
+            max-width: 100%;
+            max-height: 100%;
+            cursor: grab;
+            transform-origin: center;
+            transition: transform 0.1s ease;
+        }
+        
+        .preview-svg:active {
+            cursor: grabbing;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .zoom-btn {
+            background: rgba(0,0,0,0.7);
+            color: white;
+            border: none;
+            padding: 5px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .placeholder {
+            color: var(--text-color);
+            opacity: 0.5;
+            text-align: center;
+            font-size: 18px;
+        }
+        
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 14px;
+            min-height: 20px;
+        }
+        
+        .status.success {
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .status.error {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .status.info {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .history-section {
+            display: none;
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px var(--panel-shadow);
+        }
+        
+        .history-item {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .history-item:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-1px);
+        }
+        
+        .history-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: 12px;
+            opacity: 0.8;
+        }
+        
+        .history-theme {
+            background: var(--primary-color);
+            color: var(--primary-text);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        
+        .history-code {
+            background: var(--bg-color);
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        
+        .history-code-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: var(--primary-color);
+        }
+        
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .page-btn {
+            background: var(--panel-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            margin: 0 2px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .page-btn:hover, .page-btn.active {
+            background: var(--primary-color);
+            color: var(--primary-text);
+            border-color: var(--primary-color);
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .examples {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+        
+        <div class="header">
+            <h1>🎨 Mermaid Simple</h1>
+            <p class="subtitle">個人版 - 簡單易用的 Mermaid 圖表渲染工具</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="panel">
+                <h2>📝 編輯區</h2>
+                <textarea id="code-input" placeholder="請輸入 Mermaid 代碼..."></textarea>
+                
+                <div class="controls">
+                    <button class="btn" onclick="renderDiagram()">🎨 渲染圖表</button>
+                    <button class="btn btn-secondary" onclick="downloadResult()">💾 下載</button>
+                    <select id="format-select">
+                        <option value="svg">SVG</option>
+                        <option value="png">PNG</option>
+                    </select>
+                    <select id="theme-select" onchange="setTheme(this.value)">
+                        <option value="light">淺色主題</option>
+                        <option value="dark">深色主題</option>
+                    </select>
+                    <select id="quality-select" style="display:none;">
+                        <option value="web">網頁品質</option>
+                        <option value="a4">A4 印刷</option>
+                        <option value="a2">A2 海報</option>
+                    </select>
+                </div>
+                
+                <div class="examples">
+                    <button class="example-btn" onclick="loadExample('flowchart')">流程圖</button>
+                    <button class="example-btn" onclick="loadExample('sequence')">序列圖</button>
+                    <button class="example-btn" onclick="loadExample('gantt')">甘特圖</button>
+                    <button class="example-btn" onclick="loadExample('class')">類別圖</button>
+                    <button class="example-btn" onclick="loadExample('pie')">圓餅圖</button>
+                    <button class="example-btn" onclick="loadExample('git')">Git 圖</button>
+                </div>
+                
+                <button class="btn btn-secondary" onclick="loadHistory()" style="margin-top: 15px;">📜 查看歷史</button>
+            </div>
+            
+            <div class="panel">
+                <h2>👁️ 預覽區</h2>
+                <div class="preview-area" id="preview-area">
+                    <div class="placeholder">請先渲染圖表</div>
+                    <div class="zoom-controls" style="display:none;">
+                        <button class="zoom-btn" onclick="zoomSVG(1.2)">+</button>
+                        <button class="zoom-btn">100%</button>
+                        <button class="zoom-btn" onclick="zoomSVG(0.8)">-</button>
+                        <button class="zoom-btn" onclick="resetZoom()">重置</button>
+                    </div>
+                </div>
+                <div class="status" id="status"></div>
+            </div>
+        </div>
+        
+        <div class="history-section" id="history-section">
+            <h2>📜 今日歷史記錄</h2>
+            <div id="history-list"></div>
+            <div class="pagination" id="history-pagination"></div>
+        </div>
+    </div>
+    
+    <footer style="text-align: center; padding: 20px; margin-top: 40px; color: var(--text-color); opacity: 0.6; font-size: 12px;">
+        © 2025 David Chang - Mermaid Simple
+    </footer>
+    
+    <script>
+        let currentTheme = 'light';
+        let currentZoom = 1;
+        let svgPosition = { x: 0, y: 0 };
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let lastRenderData = null;
+        
+        // API 基礎 URL
+        const API_BASE = '';
+        
+        const examples = {
+            flowchart: `graph TD
+    A[開始] --> B{判斷條件}
+    B -->|是| C[執行動作]
+    B -->|否| D[其他動作]
+    C --> E[結束]
+    D --> E`,
+    
+            sequence: `sequenceDiagram
+    participant A as 使用者
+    participant B as 系統
+    participant C as 資料庫
+    
+    A->>B: 發送請求
+    B->>C: 查詢資料
+    C-->>B: 回傳結果
+    B-->>A: 回應結果`,
+    
+            gantt: `gantt
+    title 專案進度表
+    dateFormat  YYYY-MM-DD
+    section 規劃階段
+    需求分析     :done, des1, 2024-01-01, 2024-01-10
+    系統設計     :active, des2, 2024-01-11, 2024-01-20
+    section 開發階段
+    前端開發     :des3, after des2, 20d
+    後端開發     :des4, after des2, 25d`,
+    
+            class: `classDiagram
+    class Animal {
+        +String name
+        +int age
+        +makeSound()
+    }
+    class Dog {
+        +String breed
+        +bark()
+    }
+    Animal <|-- Dog`,
+    
+            pie: `pie title 市場份額
+    "產品A" : 42.96
+    "產品B" : 50.05
+    "產品C" : 7.01`,
+    
+            git: `gitGraph
+    commit
+    branch develop
+    checkout develop
+    commit
+    commit
+    checkout main
+    merge develop
+    commit`
+        };
+        
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            const btn = document.querySelector('.theme-toggle');
+            btn.textContent = isDark ? '☀️' : '🌙';
+            
+            currentTheme = isDark ? 'dark' : 'light';
+            document.getElementById('theme-select').value = currentTheme;
+        }
+        
+        function setTheme(theme) {
+            currentTheme = theme;
+            const isDark = theme === 'dark';
+            
+            if (isDark && !document.body.classList.contains('dark-mode')) {
+                document.body.classList.add('dark-mode');
+                document.querySelector('.theme-toggle').textContent = '☀️';
+            } else if (!isDark && document.body.classList.contains('dark-mode')) {
+                document.body.classList.remove('dark-mode');
+                document.querySelector('.theme-toggle').textContent = '🌙';
+            }
+        }
+        
+        function loadExample(type) {
+            document.getElementById('code-input').value = examples[type];
+            showStatus('範例載入完成');
+        }
+        
+        function showStatus(message, type = 'info') {
+            const status = document.getElementById('status');
+            status.className = `status ${type}`;
+            status.innerHTML = message;
+            
+            if (type !== 'error') {
+                setTimeout(() => {
+                    status.innerHTML = '';
+                    status.className = 'status';
+                }, 3000);
+            }
+        }
+        
+        async function renderDiagram() {
+            const code = document.getElementById('code-input').value.trim();
+            const format = document.getElementById('format-select').value;
+            const quality = document.getElementById('quality-select').value || 'web';
+            
+            if (!code) {
+                showStatus('請輸入 Mermaid 代碼', 'error');
+                return;
+            }
+            
+            showStatus('<div class="loading"></div> 正在渲染中...', 'info');
+            
+            try {
+                const response = await fetch('/render', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        code,
+                        format,
+                        theme: currentTheme,
+                        quality
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || '渲染失敗');
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                const previewArea = document.getElementById('preview-area');
+                const zoomControls = document.querySelector('.zoom-controls');
+                
+                if (format === 'svg') {
+                    // SVG 預覽
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.onload = () => {
+                        previewArea.innerHTML = '';
+                        previewArea.appendChild(img);
+                        previewArea.appendChild(zoomControls);
+                        setupSVGInteraction(img);
+                        zoomControls.style.display = 'flex';
+                        resetZoom();
+                    };
+                } else {
+                    // PNG 顯示
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.style.maxWidth = '100%';
+                    img.style.maxHeight = '100%';
+                    previewArea.innerHTML = '';
+                    previewArea.appendChild(img);
+                    previewArea.appendChild(zoomControls);
+                    zoomControls.style.display = 'none';
+                }
+                
+                // 儲存最後的渲染數據
+                lastRenderData = { blob, filename: `mermaid_${Date.now()}.${format}` };
+                
+                showStatus(`✅ ${format.toUpperCase()} 渲染完成`, 'success');
+                
+            } catch (error) {
+                console.error('渲染錯誤:', error);
+                showStatus(`❌ ${error.message}`, 'error');
+            }
+        }
+        
+        function downloadResult() {
+            if (!lastRenderData) {
+                showStatus('請先渲染圖表', 'error');
+                return;
+            }
+            
+            const url = URL.createObjectURL(lastRenderData.blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = lastRenderData.filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showStatus('✅ 下載開始', 'success');
+        }
+        
+        async function loadHistory() {
+            showStatus('<div class="loading"></div> 載入歷史記錄...', 'info');
+            
+            try {
+                const response = await fetch('/history');
+                
+                if (!response.ok) {
+                    throw new Error('載入歷史記錄失敗');
+                }
+                
+                const data = await response.json();
+                displayHistory(data.history);
+                showStatus(`✅ 載入了 ${data.history.length} 筆歷史記錄`, 'success');
+                
+            } catch (error) {
+                console.error('載入歷史記錄錯誤:', error);
+                showStatus(`❌ ${error.message}`, 'error');
+            }
+        }
+        
+        function extractDiagramInfo(code) {
+            const lines = code.split('\n').filter(line => line.trim());
+            let title = '';
+            let preview = '';
+            
+            // 嘗試提取 title
+            for (const line of lines) {
+                const titleMatch = line.match(/title\s+(.*)/i);
+                if (titleMatch) {
+                    title = titleMatch[1].trim();
+                    break;
+                }
+            }
+            
+            // 如果沒有標題，嘗試提取圖表類型
+            if (!title) {
+                const firstLine = lines[0].trim();
+                if (firstLine.startsWith('graph')) title = '流程圖';
+                else if (firstLine.startsWith('sequenceDiagram')) title = '序列圖';
+                else if (firstLine.startsWith('gantt')) title = '甘特圖';
+                else if (firstLine.startsWith('classDiagram')) title = '類別圖';
+                else if (firstLine.startsWith('pie')) title = '圓餅圖';
+                else if (firstLine.startsWith('gitGraph')) title = 'Git 圖';
+                else title = '未知圖表';
+            }
+            
+            // 生成預覽（前3行）
+            preview = lines.slice(0, 3).join('\n');
+            if (lines.length > 3) preview += '\n...';
+            
+            return { title, preview };
+        }
+        
+        function displayHistory(history) {
+            const historySection = document.getElementById('history-section');
+            const historyList = document.getElementById('history-list');
+            const historyPagination = document.getElementById('history-pagination');
+            
+            if (history.length === 0) {
+                historyList.innerHTML = '<p style="color: var(--text-color); opacity: 0.7;">今日暫無歷史記錄</p>';
+                historyPagination.innerHTML = '';
+            } else {
+                // 計算分頁
+                const totalPages = Math.ceil(history.length / itemsPerPage);
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const currentItems = history.slice(startIndex, endIndex);
+                
+                // 顯示當前頁面的項目
+                historyList.innerHTML = currentItems.map(item => {
+                    const date = new Date(item.timestamp);
+                    const dateTimeStr = date.toLocaleString('zh-TW', { 
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: false 
+                    });
+                    
+                    const { title, preview } = extractDiagramInfo(item.code);
+                    
+                    return `
+                        <div class="history-item" onclick="loadHistoryItem('${item.id}')">
+                            <div class="history-meta">
+                                <span class="history-time">${dateTimeStr}</span>
+                                <span class="history-theme">${item.theme === 'dark' ? '深色' : '淺色'}</span>
+                            </div>
+                            <div class="history-code">
+                                <div class="history-code-title">${title}</div>
+                                <div>${preview}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // 顯示分頁控制
+                if (totalPages > 1) {
+                    let paginationHTML = '';
+                    
+                    // 上一頁
+                    if (currentPage > 1) {
+                        paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage - 1})">‹ 上一頁</button>`;
+                    }
+                    
+                    // 頁碼
+                    for (let i = 1; i <= totalPages; i++) {
+                        if (i === currentPage) {
+                            paginationHTML += `<button class="page-btn active">${i}</button>`;
+                        } else {
+                            paginationHTML += `<button class="page-btn" onclick="changePage(${i})">${i}</button>`;
+                        }
+                    }
+                    
+                    // 下一頁
+                    if (currentPage < totalPages) {
+                        paginationHTML += `<button class="page-btn" onclick="changePage(${currentPage + 1})">下一頁 ›</button>`;
+                    }
+                    
+                    historyPagination.innerHTML = paginationHTML;
+                } else {
+                    historyPagination.innerHTML = '';
+                }
+            }
+            
+            historySection.style.display = 'block';
+            historySection.scrollIntoView({ behavior: 'smooth' });
+            
+            // 儲存歷史數據供後續使用
+            window.historyData = history;
+        }
+        
+        function changePage(page) {
+            currentPage = page;
+            displayHistory(window.historyData);
+        }
+        
+        function setupSVGInteraction(svgElement) {
+            svgElement.classList.add('preview-svg');
+            
+            // 滾輪縮放
+            svgElement.addEventListener('wheel', function(e) {
+                e.preventDefault();
+                const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+                zoomSVG(zoomFactor);
+            });
+            
+            // 拖拽功能
+            svgElement.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                dragStart.x = e.clientX - svgPosition.x;
+                dragStart.y = e.clientY - svgPosition.y;
+                svgElement.style.cursor = 'grabbing';
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                svgPosition.x = e.clientX - dragStart.x;
+                svgPosition.y = e.clientY - dragStart.y;
+                
+                updateSVGTransform();
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                const svgElement = document.querySelector('.preview-svg');
+                if (svgElement) {
+                    svgElement.style.cursor = 'grab';
+                }
+            });
+        }
+        
+        function zoomSVG(factor) {
+            currentZoom *= factor;
+            currentZoom = Math.max(0.1, Math.min(5, currentZoom));
+            updateSVGTransform();
+        }
+        
+        function resetZoom() {
+            currentZoom = 1;
+            svgPosition = { x: 0, y: 0 };
+            updateSVGTransform();
+        }
+        
+        function updateSVGTransform() {
+            const svgElement = document.querySelector('.preview-svg');
+            if (svgElement) {
+                svgElement.style.transform = `translate(${svgPosition.x}px, ${svgPosition.y}px) scale(${currentZoom})`;
+                
+                // 更新縮放按鈕顯示
+                const zoomDisplay = document.querySelector('.zoom-btn:nth-child(2)');
+                if (zoomDisplay) {
+                    zoomDisplay.textContent = Math.round(currentZoom * 100) + '%';
+                }
+            }
+        }
+        
+        function loadHistoryItem(id) {
+            if (!window.historyData) return;
+            
+            const item = window.historyData.find(h => h.id === id);
+            if (item) {
+                document.getElementById('code-input').value = item.code;
+                setTheme(item.theme);
+                showStatus(`已載入歷史記錄 (${new Date(item.timestamp).toLocaleTimeString('zh-TW')})`);
+                
+                // 滾動到編輯區
+                document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
+                
+                // 自動渲染
+                renderDiagram();
+            }
+        }
+        
+        // 監聽格式變更，顯示/隱藏品質選項
+        document.getElementById('format-select').addEventListener('change', function() {
+            const qualitySelect = document.getElementById('quality-select');
+            if (this.value === 'png') {
+                qualitySelect.style.display = 'inline-block';
+            } else {
+                qualitySelect.style.display = 'none';
+            }
+        });
+        
+        // 頁面載入完成後預設載入範例
+        window.addEventListener('load', function() {
+            loadExample('flowchart');
+        });
+    </script>
+</body>
+</html>

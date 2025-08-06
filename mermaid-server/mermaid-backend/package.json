@@ -1,0 +1,39 @@
+{
+  "name": "mermaid-2-png-backend",
+  "version": "1.0.0",
+  "description": "🎨 Mermaid 2 PNG - A simple and efficient Mermaid diagram rendering service with SVG and high-quality PNG output",
+  "main": "secure_server.js",
+  "scripts": {
+    "start": "node secure_server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "mermaid",
+    "diagram",
+    "svg",
+    "png",
+    "visualization",
+    "chart",
+    "flowchart",
+    "sequence-diagram"
+  ],
+  "author": "David Chang",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  },
+  "peerDependencies": {
+    "@mermaid-js/mermaid-cli": ">=10.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/mermaid-2-png.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/mermaid-2-png/issues"
+  },
+  "homepage": "https://github.com/your-username/mermaid-2-png#readme"
+}
